@@ -5,7 +5,7 @@ const theme = ref(localStorage.getItem('theme') ?? 'light')
 
 function onClick() {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
-  localStorage.setItem('theme', theme.valuegit)
+  localStorage.setItem('theme', theme.value)
 }
 </script>
 
