@@ -9,7 +9,7 @@ function onClick() {
 </script>
 
 <template>
-  <v-responsive class="border rounded">
+  <v-responsive>
     <v-app :theme="theme">
       <v-app-bar class="px-3">
         <v-spacer></v-spacer>
@@ -28,7 +28,7 @@ function onClick() {
         </v-container>
       </v-main>
 
-      <v-footer color="transparent" elevation="20" border app> 2025 - Reservo</v-footer>
+      <v-footer class="font-weight-bold" color="transparent" elevation="20" border app> 2025 - Reservo</v-footer>
     </v-app>
   </v-responsive>
 </template>
