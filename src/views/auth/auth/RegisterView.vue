@@ -12,6 +12,8 @@ const { mobile } = useDisplay()
       ><v-row>
         <v-col cols="12" md="6">
           <v-card class="mx-auto text-center" subtitle="Create your account">
+
+
             <template #title>
               <v-img
                 class="mx-auto"
@@ -21,7 +23,9 @@ const { mobile } = useDisplay()
             </template>
             <v-divider class="my-5"></v-divider>
             <v-card-text class="bg-surface-light pt-4">
+              
               <RegisterForm></RegisterForm>
+
             </v-card-text>
           </v-card>
         </v-col>
