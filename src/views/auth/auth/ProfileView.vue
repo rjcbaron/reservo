@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-
+import AppLayout from '@/components/layout/AppLayout.vue'
 // Simulated user session data — replace with real auth data
 const user = ref({
   firstName: 'Jane',
@@ -22,7 +22,8 @@ function cancelEdit() {
   // Reset to original values if needed
 }
 </script>
-
+<template>
+  <AppLayout>
 <template>
   <v-container class="d-flex justify-center align-center" style="min-height: 100vh">
     <v-card class="pa-6" max-width="600" width="100%">
@@ -55,4 +56,6 @@ function cancelEdit() {
       </v-card-actions>
     </v-card>
   </v-container>
+</template>
+</AppLayout>
 </template>

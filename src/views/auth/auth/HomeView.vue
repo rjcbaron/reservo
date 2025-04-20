@@ -1,4 +1,23 @@
+<script setup>
+import { ref } from 'vue'
+import AppLayout from '@/components/layout/AppLayout.vue'
+
+const formattedDate = ref(
+  new Date().toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }),
+)
+</script>
+
 <template>
+<AppLayout>
+<template #content>
   <v-container fluid class="pa-4">
     <!-- Welcome Banner -->
     <v-card
@@ -51,20 +70,6 @@
   </v-container>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-
-const formattedDate = ref(
-  new Date().toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }),
-)
-</script>
-
+</AppLayout>
+</template>
 <style scoped></style>
