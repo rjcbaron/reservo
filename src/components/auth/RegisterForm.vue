@@ -1,7 +1,8 @@
 <script setup>
-  import { ref } from 'vue'
+import { ref } from 'vue'
 
-  const isPasswordvisible = ref(false)
+const isConfirmPasswordVisible = ref(false)
+const isPasswordvisible = ref(false)
 </script>
 
 <template>
@@ -29,12 +30,12 @@
 
     <v-text-field
       label="Password Confirmation"
-      t:type="isPasswordvisible ? 'text' : 'password'"
-      :append-inner-icon="isPasswordvisible ? 'mdi-eye-off' : 'mdi-eye-outline'"
+      :type="isConfirmPasswordVisible ? 'text' : 'password'"
+      :append-inner-icon="isConfirmPasswordVisible ? 'mdi-eye-off' : 'mdi-eye-outline'"
       variant="outlined"
       prepend-inner-icon="mdi-lock"
-      @click:append-inner="isPasswordvisible = !isPasswordvisible"
-    ></v-text-field>
+      @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
+    />
 
     <v-divider class="my-5"></v-divider>
     <h5 class="text-center">
