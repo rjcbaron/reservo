@@ -1,11 +1,14 @@
 <script setup>
 import { ref } from 'vue'
+import { supabase, formActionDefault } from '@/utils/supabase.js'
+
 import {
   requiredValidator,
   emailValidator,
   passwordValidator,
   confirmedValidator,
 } from '@/utils/validators'
+import AlertNotification from '../common/AlertNotification.vue'
 
 const formDataDefault = {
   firstname: '',
@@ -15,18 +18,47 @@ const formDataDefault = {
   password_confirmation: '',
 }
 
-const onSubmit = () => {
-  // later for supabase just remove the double slash and this message // alert(formData.value.email)
+const onSubmit = async () => {
+  formAction.value = { ...formActionDefault }
+  formAction.value.formProcess = true
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.value.email,
+    password: formData.value.password,
+    options: {
+      data: {
+        firstname: formData.value.firstname,
+        lastname: formData.value.lastname,
+      },
+    },
+  })
+
+  if (error) {
+    console.log(error)
+    formAction.value.formErrorMessage = error.message
+    formAction.value.formStatus = error.status
+  } else if (data) {
+    console.log(data)
+    formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+    //Add here more actions if you want
+    refVForm.value?.reset()
+  }
+
+  formAction.value.formProcess = false
 }
 
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-    if (valid) onSubmit
+    if (valid) onSubmit()
   })
 }
 
 const formData = ref({
   ...formDataDefault,
+})
+
+const formAction = ref({
+  ...formActionDefault,
 })
 
 const isConfirmPasswordVisible = ref(false)
@@ -35,7 +67,13 @@ const refVForm = ref()
 </script>
 
 <template>
-  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+  <AlertNotification
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  >
+  </AlertNotification>
+
+  <v-form class="mt-5" ref="refVForm" @submit.prevent="onFormSubmit">
     <v-text-field
       v-model="formData.firstname"
       label="First Name"
@@ -88,7 +126,14 @@ const refVForm = ref()
       Already have acount?
       <RouterLink class="text-primary" to="/"> Click here to log in</RouterLink>
     </h5>
-    <v-btn class="mt-2" type="submit" block color="primary" prepend-icon="mdi-account-plus"
+    <v-btn
+      class="mt-2"
+      type="submit"
+      block
+      color="primary"
+      prepend-icon="mdi-account-plus"
+      :disabled="formAction.formProcess"
+      :loading="formAction.formProcess"
       >Sign Up</v-btn
     >
   </v-form>
