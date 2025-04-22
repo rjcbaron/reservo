@@ -29,7 +29,9 @@ function onClick() {
         </v-container>
       </v-main>
 
-      <v-footer class="font-weight-bold" color="transparent" elevation="20" border app> 2025 - Reservo</v-footer>
+      <v-footer class="font-weight-bold" color="transparent" elevation="20" border app>
+        2025 - Reservo</v-footer
+      >
     </v-app>
   </v-responsive>
 </template>
