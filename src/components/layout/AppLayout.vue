@@ -47,13 +47,13 @@ function viewProfile() {
 
     <!-- Page Content -->
     <v-main>
-      <v-container>
+      <div class="fill-height pa-0 ma-0">
         <slot name="content"></slot>
-      </v-container>
+      </div>
     </v-main>
 
     <v-footer class="font-weight-bold" color="transparent" elevation="20" border app>
-      2025 - Reservo</v-footer
-    >
+      2025 - Reservo
+    </v-footer>
   </v-app>
 </template>
