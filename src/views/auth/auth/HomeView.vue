@@ -78,16 +78,16 @@ const profile = ref({
         </v-card>
 
         <!-- Scheduled Reservation Section -->
-        <v-row class="mt-5 ms-2 mb-6" justify="left">
-          <v-col cols="12" md="10">
+        <v-row class="mt-5 mb-2" justify="center">
+          <v-col cols="12" md="11">
             <v-card
               elevation="4"
               rounded="xl"
-              class="pa-4"
-              max-width="700"
+              class="pa-4 mx-auto"
               color="blue-grey-lighten-5"
               style="border: 2px dashed #90caf9"
             >
+              <!-- reservation reminder with cancel and update features -->
               <v-row align="center">
                 <v-col cols="12" md="1" class="text-center">
                   <v-icon color="blue" size="36">mdi-calendar-check</v-icon>
