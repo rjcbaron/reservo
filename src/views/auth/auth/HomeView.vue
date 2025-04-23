@@ -46,14 +46,7 @@ const bookAppointment = () => {
     <template #content>
       <v-container fluid class="pa-4">
         <!-- Welcome Banner -->
-        <v-card
-          class="ms-4 pa-4"
-          color="blue-lighten-2"
-          theme="dark"
-          elevation="8"
-          max-width="800"
-          rounded="lg"
-        >
+        <v-card class="ms-4 pa-4" color="blue-lighten-2" theme="dark" elevation="8" rounded="lg">
           <v-row align="center" justify="space-between">
             <div>
               <h2 class="text-h5 font-weight-bold ms-4">Welcome, future champions!</h2>
@@ -72,7 +65,7 @@ const bookAppointment = () => {
 
         <!-- Map Section -->
 
-        <v-container class="d-flex justify-center align-center" style="min-height: 100vh">
+        <v-container class="d-flex justify-center align-center">
           <v-row class="w-100" align="center" justify="center">
             <v-col cols="12" md="4">
               <v-card elevation="2" class="rounded-xl pa-4">
