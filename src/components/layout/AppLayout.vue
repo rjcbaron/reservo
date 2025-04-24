@@ -1,6 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router'
 
+
+
+
 // get the router instance
 const router = useRouter()
 
@@ -10,6 +13,10 @@ function logout() {
 
   // Redirect to login or home
   router.push('/')}
+
+
+  // Load Variables
+
 
   function viewProfile () {
 

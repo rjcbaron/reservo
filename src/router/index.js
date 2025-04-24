@@ -4,6 +4,7 @@ import RegisterView from '@/views/auth/auth/RegisterView.vue'
 import ProfileView from '@/views/auth/auth/ProfileView.vue'
 import HomeView from '@/views/auth/auth/HomeView.vue'
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -27,6 +28,8 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
     },
+
+
   ],
 })
 
