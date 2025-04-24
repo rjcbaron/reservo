@@ -19,8 +19,8 @@ function viewProfile() {
 
 <template>
   <v-app>
-    <v-app-bar app color="blue-lighten-2" dark>
-      <v-img src="images/logo.png" alt="Logo" max-width="90" class="mr-4" />
+    <v-app-bar app dark style="background: linear-gradient(to right, rgb(220, 222, 231), #1976d2)">
+      <v-img src="images/logo.png" alt="Logo" max-width="120" class="mr-4" />
 
       <v-spacer />
 
