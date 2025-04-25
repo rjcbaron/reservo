@@ -1,14 +1,12 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-// get the router instance
+const drawer = ref(false)
 const router = useRouter()
 
 function logout() {
-  // Clear any auth/session data (optional)
-  localStorage.removeItem('token') // if you use tokens
-
-  // Redirect to login or home
+  localStorage.removeItem('token')
   router.push('/')
 }
 
@@ -19,16 +17,41 @@ function viewProfile() {
 
 <template>
   <v-app>
-    <v-app-bar app dark style="background: linear-gradient(to right, rgb(220, 222, 231), #1976d2)">
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer v-model="drawer" color="blue-lighten-2">
+      <v-btn icon @click="drawer = !drawer" class="mb-3">
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
+
+      <v-list>
+        <v-list-item @click="$router.push('/home')">
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="$router.push('/reservation')">
+          <v-list-item-title>Reserve</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="viewProfile">
+          <v-list-item-title>View Profile</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="logout">
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <!-- App Bar -->
+    <v-app-bar app dark style="background: linear-gradient(to right, rgb(220, 222, 231), #64b5f6)">
+      <!-- Burger Menu Icon (only shows on small screens) -->
+      <v-app-bar-nav-icon @click="drawer = !drawer" class="d-sm-none"></v-app-bar-nav-icon>
+
       <v-img src="images/logo.png" alt="Logo" max-width="120" class="mr-4" />
 
       <v-spacer />
 
-      <v-btn to="/home" text>Home</v-btn>
-      <v-btn to="/reservation" text>Reserve</v-btn>
+      <v-btn to="/home" text class="d-none d-sm-flex">Home</v-btn>
+      <v-btn to="/reservation" text class="d-none d-sm-flex">Reserve</v-btn>
 
-      <!-- Profile Menu -->
-      <v-menu offset-y>
+      <v-menu offset-y class="d-none d-sm-flex">
         <template #activator="{ props }">
           <v-btn icon v-bind="props">
             <v-icon>mdi-account</v-icon>
