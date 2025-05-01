@@ -1,14 +1,11 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-// get the router instance
 const router = useRouter()
 
 function logout() {
-  // Clear any auth/session data (optional)
-  localStorage.removeItem('token') // if you use tokens
-
-  // Redirect to login or home
+  localStorage.removeItem('token')
   router.push('/')
 }
 
@@ -19,39 +16,49 @@ function viewProfile() {
 
 <template>
   <v-app>
-    <v-app-bar app color="blue-lighten-2" dark>
-      <v-img src="images/logo.png" alt="Logo" max-width="90" class="mr-4" />
+    <!-- Side Drawer -->
+    <v-navigation-drawer
+      app
+      permanent
+      style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
+    >
+      <!-- Logo -->
+      <v-container class="text-center py-4">
+        <v-avatar size="150" class="mx-auto">
+          <v-img src="images/logo.png" alt="Logo" cover></v-img>
+        </v-avatar>
+      </v-container>
 
-      <v-spacer />
+      <!-- Menu List -->
+      <v-list nav dense>
+        <v-list-item @click="$router.push('/home')" link>
+          <v-list-item-title class="text-subtitle-1"
+            ><v-icon start>mdi-book</v-icon>Book Reservation</v-list-item-title
+          >
+        </v-list-item>
 
-      <v-btn to="/home" text>Home</v-btn>
-      <v-btn to="/reservation" text>Reserve</v-btn>
+        <v-list-item @click="viewProfile" link>
+          <v-list-item-title class="text-subtitle-1"
+            ><v-icon start>mdi-account</v-icon>View Profile</v-list-item-title
+          >
+        </v-list-item>
 
-      <!-- Profile Menu -->
-      <v-menu offset-y>
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-account</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="viewProfile">
-            <v-list-item-title>View Profile</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="logout">
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-app-bar>
+        <v-list-item @click="logout" link>
+          <v-list-item-title class="text-subtitle-1"
+            ><v-icon start>mdi-logout</v-icon>Logout</v-list-item-title
+          >
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-    <!-- Page Content -->
+    <!-- Main Content -->
     <v-main>
       <div class="fill-height pa-0 ma-0">
         <slot name="content"></slot>
       </div>
     </v-main>
 
+    <!-- Footer -->
     <v-footer class="font-weight-bold" color="transparent" elevation="20" border app>
       2025 - Reservo
     </v-footer>

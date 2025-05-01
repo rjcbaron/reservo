@@ -13,7 +13,9 @@ const { mobile } = useDisplay()
         class="d-flex align-center justify-center"
         style="
           min-height: 100dvh;
-          background: url('/public/images/test-bg.jpg') center/cover no-repeat;
+          background:
+            linear-gradient(to bottom right, rgba(26, 101, 162, 0.6), rgba(119, 154, 229, 0.6)),
+            url('/images/facility.jpg') center/cover no-repeat;
         "
       >
         <v-row justify="center">
@@ -23,7 +25,12 @@ const { mobile } = useDisplay()
               subtitle="Log in to your account"
               max-width="450"
               elevation="10"
-              style="background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(3px)"
+              style="
+                background-color: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(3px);
+                border: 2px solid #2196f3;
+                border-radius: 16px;
+              "
             >
               <template #title>
                 <v-img
