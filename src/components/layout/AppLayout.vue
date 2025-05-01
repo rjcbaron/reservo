@@ -1,9 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
 
-
-
-
 // get the router instance
 const router = useRouter()
 
@@ -12,16 +9,12 @@ function logout() {
   localStorage.removeItem('token') // if you use tokens
 
   // Redirect to login or home
-  router.push('/')}
+  router.push('/')
+}
 
-
-  // Load Variables
-
-
-  function viewProfile () {
-
-    router.push('/profile')
-  }
+function viewProfile() {
+  router.push('/profile')
+}
 </script>
 
 <template>
@@ -54,11 +47,13 @@ function logout() {
 
     <!-- Page Content -->
     <v-main>
-        <v-container>
-          <slot name="content"></slot>
-        </v-container>
-      </v-main>
+      <div class="fill-height pa-0 ma-0">
+        <slot name="content"></slot>
+      </div>
+    </v-main>
 
-      <v-footer class="font-weight-bold" color="transparent" elevation="20" border app> 2025 - Reservo</v-footer>
-    </v-app>
+    <v-footer class="font-weight-bold" color="transparent" elevation="20" border app>
+      2025 - Reservo
+    </v-footer>
+  </v-app>
 </template>

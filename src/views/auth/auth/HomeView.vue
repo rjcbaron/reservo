@@ -5,6 +5,7 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 const selectedDate = ref('2025-04-22')
 const selectedTime = ref('')
 const dialog = ref(false)
+const confirmed = ref(false)
 
 const morningSlots = [
   '8:00 AM',
@@ -39,6 +40,21 @@ const bookAppointment = () => {
     dialog.value = true
   }
 }
+
+const confirmBooking = () => {
+  confirmed.value = true
+  dialog.value = false
+}
+
+const cancelBooking = () => {
+  confirmed.value = false
+  selectedTime.value = ''
+}
+
+const profile = ref({
+  firstName: 'John',
+  lastName: 'Doe',
+})
 </script>
 
 <template>
@@ -46,20 +62,11 @@ const bookAppointment = () => {
     <template #content>
       <v-container fluid class="pa-4">
         <!-- Welcome Banner -->
-        <v-card
-          class="ms-4 pa-4"
-          color="blue-lighten-2"
-          theme="dark"
-          elevation="8"
-          max-width="800"
-          rounded="lg"
-        >
+        <v-card class="ms-4 pa-4" color="blue-lighten-2" theme="dark" elevation="8" rounded="lg">
           <v-row align="center" justify="space-between">
             <div>
-              <h2 class="text-h5 font-weight-bold ms-4">Welcome, future champions!</h2>
-              <p class="ms-4">
-                Reserve your spot, sharpen your skills, and compete in upcoming tournaments!
-              </p>
+              <h2 class="text-h5 font-weight-bold ms-4">Welcome, {{ profile.firstName }}!</h2>
+              <p class="ms-4">Reserve your spot and get ready for your next game!</p>
             </div>
             <v-img
               src="/images/sports-banner.png"
@@ -70,9 +77,46 @@ const bookAppointment = () => {
           </v-row>
         </v-card>
 
-        <!-- Map Section -->
+        <!-- Scheduled Reservation Section -->
+        <v-row class="mt-5 mb-2" justify="center">
+          <v-col cols="12" md="11">
+            <v-card
+              elevation="4"
+              rounded="xl"
+              class="pa-4 mx-auto"
+              color="blue-grey-lighten-5"
+              style="border: 2px dashed #90caf9"
+            >
+              <!-- reservation reminder with cancel and update features -->
+              <v-row align="center">
+                <v-col cols="12" md="1" class="text-center">
+                  <v-icon color="blue" size="36">mdi-calendar-check</v-icon>
+                </v-col>
+                <v-col cols="12" md="11">
+                  <div v-if="confirmed">
+                    <p class="text-body-1 font-weight-medium">
+                      📢 You have confirmed a reservation on
+                      <strong>{{ selectedDate }}</strong> at <strong>{{ selectedTime }}</strong
+                      >.
+                    </p>
+                    <v-btn color="red" variant="text" @click="cancelBooking">Cancel</v-btn>
+                    <v-btn color="blue-lighten-1" variant="text" @click="confirmed = false"
+                      >Update</v-btn
+                    >
+                  </div>
+                  <div v-else>
+                    <p class="text-body-2 text-grey-darken-1">
+                      No reservation scheduled yet. Select a time to reserve your slot.
+                    </p>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card>
+          </v-col>
+        </v-row>
 
-        <v-container class="d-flex justify-center align-center" style="min-height: 100vh">
+        <!-- Booking Section -->
+        <v-container class="d-flex justify-center align-center">
           <v-row class="w-100" align="center" justify="center">
             <v-col cols="12" md="4">
               <v-card elevation="2" class="rounded-xl pa-4">
@@ -81,7 +125,7 @@ const bookAppointment = () => {
                   color="blue-lighten-1"
                   show-adjacent-months
                   class="rounded-lg"
-                ></v-date-picker>
+                />
               </v-card>
             </v-col>
 
@@ -154,7 +198,7 @@ const bookAppointment = () => {
               </v-card-text>
               <v-card-actions class="justify-end">
                 <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                <v-btn color="primary" @click="dialog = false">Confirm</v-btn>
+                <v-btn color="primary" @click="confirmBooking">Confirm</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -163,4 +207,5 @@ const bookAppointment = () => {
     </template>
   </AppLayout>
 </template>
+
 <style scoped></style>
