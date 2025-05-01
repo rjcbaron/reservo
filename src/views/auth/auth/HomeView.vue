@@ -62,7 +62,12 @@ const profile = ref({
     <template #content>
       <v-container fluid class="pa-4">
         <!-- Welcome Banner -->
-        <v-card class="ms-4 pa-4" color="blue-lighten-2" theme="dark" elevation="8" rounded="lg">
+        <v-card
+          class="ms-4 pa-4"
+          style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
+          elevation="8"
+          rounded="lg"
+        >
           <v-row align="center" justify="space-between">
             <div>
               <h2 class="text-h5 font-weight-bold ms-4">Welcome, {{ profile.firstName }}!</h2>
@@ -131,6 +136,7 @@ const profile = ref({
 
             <v-col cols="12" md="7">
               <v-card elevation="2" class="rounded-xl pa-6">
+                <!-- Morning Slots -->
                 <v-row class="mb-6">
                   <v-col cols="12">
                     <h3 class="text-h6 font-weight-bold mb-2">Morning</h3>
@@ -139,9 +145,12 @@ const profile = ref({
                         v-for="time in morningSlots"
                         :key="time"
                         :variant="selectedTime === time ? 'flat' : 'outlined'"
-                        :color="selectedTime === time ? 'blue-lighten-1' : 'blue-grey-lighten-3'"
+                        :class="
+                          selectedTime === time ? 'text-white' : 'text-black border-blue-lighten-1'
+                        "
                         class="rounded-lg text-caption ma-1"
                         style="min-width: 90px"
+                        color="blue-lighten-1"
                         @click="selectedTime = time"
                       >
                         {{ time }}
@@ -150,6 +159,7 @@ const profile = ref({
                   </v-col>
                 </v-row>
 
+                <!-- Afternoon Slots -->
                 <v-row class="mb-6">
                   <v-col cols="12">
                     <h3 class="text-h6 font-weight-bold mb-2">Afternoon</h3>
@@ -158,7 +168,7 @@ const profile = ref({
                         v-for="time in afternoonSlots"
                         :key="time"
                         :variant="selectedTime === time ? 'flat' : 'outlined'"
-                        :color="selectedTime === time ? 'blue-lighten-1' : 'blue-grey-lighten-3'"
+                        color="blue-lighten-1"
                         class="rounded-lg text-caption ma-1"
                         style="min-width: 90px"
                         @click="selectedTime = time"
@@ -171,6 +181,7 @@ const profile = ref({
 
                 <v-divider class="my-6" />
 
+                <!-- Book Now Button -->
                 <div class="text-center">
                   <v-btn
                     color="blue-lighten-1"
