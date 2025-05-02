@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { supabase } from '@/utils/supabase'
 
 const selectedDate = ref('2025-04-22')
 const selectedTime = ref('')
@@ -41,9 +42,38 @@ const bookAppointment = () => {
   }
 }
 
-const confirmBooking = () => {
+const confirmBooking = async () => {
   confirmed.value = true
   dialog.value = false
+
+  const reservedStart = new Date(`${selectedDate.value} ${selectedTime.value}`)
+  const reservedEnd = new Date(reservedStart.getTime() + 30 * 60000)
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    console.error('User not found:', userError)
+    return
+  }
+
+  const { error } = await supabase.from('reservations').insert([
+    {
+      user_id: user.id,
+      facility_id: 1, // Replace with dynamic facility_id if needed
+      status: 'confirmed',
+      reserved_start: reservedStart.toISOString(),
+      reserved_end: reservedEnd.toISOString(),
+    },
+  ])
+
+  if (error) {
+    console.error('Failed to insert reservation:', error)
+  } else {
+    console.log('Reservation created successfully')
+  }
 }
 
 const cancelBooking = () => {
