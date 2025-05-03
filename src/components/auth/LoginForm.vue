@@ -1,43 +1,61 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/utils/supabase'
 import { requiredValidator, emailValidator } from '@/utils/validators'
 
+const router = useRouter()
 const isPasswordvisible = ref(false)
 const refVForm = ref()
 
-const formDataDefault = {
+const formData = ref({
   email: '',
   password: '',
-}
-
-const formData = ref({
-  ...formDataDefault
 })
 
-const onSubmit = () => {
-  // later for supabase just remove the double slash and this message // alert(formData.value.email)
+const formError = ref('')
+const formProcessing = ref(false)
+
+const onSubmit = async () => {
+  formProcessing.value = true
+  formError.value = ''
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: formData.value.email,
+    password: formData.value.password,
+  })
+
+  if (error) {
+    formError.value = error.message
+  } else if (data?.session) {
+    // ✅ Redirect to dashboard on success
+    router.push('/home')
+  }
+
+  formProcessing.value = false
 }
 
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
-     if(valid)
-     onSubmit()
+    if (valid) onSubmit()
   })
 }
 </script>
 
 <template>
-  <v-form ref="refVForm"  @submit.prevent="onFormSubmit">
+  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+    <v-alert v-if="formError" type="error" class="mb-4">{{ formError }}</v-alert>
+
     <v-text-field
-    v-model="formData.email"
+      v-model="formData.email"
       label="Email"
       variant="outlined"
       prepend-inner-icon="mdi-email"
       :rules="[requiredValidator, emailValidator]"
-    ></v-text-field>
+    />
 
     <v-text-field
-    v-model="formData.password"
+      v-model="formData.password"
       label="Password"
       :type="isPasswordvisible ? 'text' : 'password'"
       :append-inner-icon="isPasswordvisible ? 'mdi-eye-off' : 'mdi-eye-outline'"
@@ -45,8 +63,17 @@ const onFormSubmit = () => {
       prepend-inner-icon="mdi-lock"
       @click:append-inner="isPasswordvisible = !isPasswordvisible"
       :rules="[requiredValidator]"
-    ></v-text-field>
+    />
 
-    <v-btn class="mt-2" type="submit" block color="primary" prepend-icon="mdi-login">Log In</v-btn>
+    <v-btn
+      class="mt-2"
+      type="submit"
+      block
+      color="primary"
+      prepend-icon="mdi-login"
+      :loading="formProcessing"
+    >
+      Log In
+    </v-btn>
   </v-form>
 </template>
