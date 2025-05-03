@@ -16,10 +16,7 @@ const profile = ref({
 })
 
 // Sample reservations (can also be fetched from Supabase)
-const reservations = ref([
-  { date: '2025-04-20', time: '9:00 AM' },
-  { date: '2025-04-22', time: '2:30 PM' },
-])
+const reservations = ref([])
 
 // Fetch profile data on mount
 onMounted(async () => {
@@ -200,10 +197,14 @@ const saveChanges = async () => {
                 <v-window-item value="about">
                   <h3 class="text-h6 font-weight-bold mb-4">About Us</h3>
                   <p class="text-body-2">
-                    We provide a seamless appointment scheduling platform. Lorem ipsum dolor sit
-                    amet consectetur adipisicing elit. Totam minus, a pariatur facere nisi sed
-                    tempore possimus mollitia tenetur quam eos aliquam assumenda! Totam ipsa
-                    similique natus aspernatur, eius ut?
+                    Welcome to our reservation platform! <br /><br />
+                    This system is developed as a final project for IT 110 – Web Systems and
+                    Technologies. <br />
+                    Our goal is to provide a fast, easy, and reliable way to book facility
+                    slots—whether for sports, meetings, or other activities.
+                    <br />
+                    <br />
+                    Thank you for trying out our system!
                   </p>
                 </v-window-item>
               </v-window>
