@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { supabase } from '@/utils/supabase'
 
 const selectedDate = ref('2025-04-22')
 const selectedTime = ref('')
@@ -35,26 +36,71 @@ const afternoonSlots = [
   '7:00 PM',
 ]
 
+const profile = ref({
+  firstName: '',
+  lastName: '',
+})
+
+onMounted(async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    console.error('User not logged in:', error)
+    return
+  }
+
+  // Get name !
+  profile.value.firstName = user.user_metadata?.firstname || 'User'
+  profile.value.lastName = user.user_metadata?.lastname || ''
+})
+
 const bookAppointment = () => {
   if (selectedTime.value) {
     dialog.value = true
   }
 }
 
-const confirmBooking = () => {
+const confirmBooking = async () => {
   confirmed.value = true
   dialog.value = false
+
+  const reservedStart = new Date(`${selectedDate.value} ${selectedTime.value}`)
+  const reservedEnd = new Date(reservedStart.getTime() + 30 * 60000)
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    console.error('User not found:', userError)
+    return
+  }
+
+  const { error } = await supabase.from('reservations').insert([
+    {
+      user_id: user.id,
+      facility_id: 1,
+      status: 'confirmed',
+      reserved_start: reservedStart.toISOString(),
+      reserved_end: reservedEnd.toISOString(),
+    },
+  ])
+
+  if (error) {
+    console.error('Failed to insert reservation:', error)
+  } else {
+    console.log('Reservation created successfully')
+  }
 }
 
 const cancelBooking = () => {
   confirmed.value = false
   selectedTime.value = ''
 }
-
-const profile = ref({
-  firstName: 'John',
-  lastName: 'Doe',
-})
 </script>
 
 <template>
