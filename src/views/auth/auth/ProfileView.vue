@@ -1,23 +1,73 @@
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import { supabase } from '@/utils/supabase'
 
 const currentTab = ref('profile')
 
 const profile = ref({
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john@example.com',
-  confirmEmail: 'john@example.com',
+  firstName: '',
+  lastName: '',
+  email: '',
+  confirmEmail: '',
   password: '',
   confirmPassword: '',
-  phone: '09123456789',
+  phone: '',
 })
 
+// Sample reservations (can also be fetched from Supabase)
 const reservations = ref([
   { date: '2025-04-20', time: '9:00 AM' },
   { date: '2025-04-22', time: '2:30 PM' },
 ])
+
+// Fetch profile data on mount
+onMounted(async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    console.error('User not logged in:', error)
+    return
+  }
+
+  const metadata = user.user_metadata || {}
+  profile.value.firstName = metadata.firstname || ''
+  profile.value.lastName = metadata.lastname || ''
+  profile.value.email = user.email || ''
+  profile.value.confirmEmail = user.email || ''
+  profile.value.phone = metadata.phone || ''
+})
+
+// Optional: Save profile updates
+const saveChanges = async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (!user || error) {
+    console.error('User not found:', error)
+    return
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
+    email: profile.value.email,
+    data: {
+      firstname: profile.value.firstName,
+      lastname: profile.value.lastName,
+      phone: profile.value.phone,
+    },
+  })
+
+  if (updateError) {
+    console.error('Failed to update user:', updateError)
+  } else {
+    alert('Profile updated successfully!')
+  }
+}
 </script>
 
 <template>
@@ -106,7 +156,9 @@ const reservations = ref([
                     outlined
                     class="mb-6"
                   />
-                  <v-btn color="blue-lighten-1" size="large">Save Changes</v-btn>
+                  <v-btn color="blue-lighten-1" size="large" @click="saveChanges">
+                    Save Changes
+                  </v-btn>
                 </v-window-item>
 
                 <!-- Reservations Tab -->
