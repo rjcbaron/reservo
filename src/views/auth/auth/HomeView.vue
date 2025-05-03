@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
 
@@ -35,6 +35,27 @@ const afternoonSlots = [
   '6:30 PM',
   '7:00 PM',
 ]
+
+const profile = ref({
+  firstName: '',
+  lastName: '',
+})
+
+onMounted(async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    console.error('User not logged in:', error)
+    return
+  }
+
+  // Get name from metadata (assuming you saved it during signup or user update)
+  profile.value.firstName = user.user_metadata?.firstname || 'User'
+  profile.value.lastName = user.user_metadata?.lastname || ''
+})
 
 const bookAppointment = () => {
   if (selectedTime.value) {
@@ -80,11 +101,6 @@ const cancelBooking = () => {
   confirmed.value = false
   selectedTime.value = ''
 }
-
-const profile = ref({
-  firstName: 'John',
-  lastName: 'Doe',
-})
 </script>
 
 <template>
