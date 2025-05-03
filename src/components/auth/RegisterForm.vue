@@ -9,6 +9,11 @@ import {
   confirmedValidator,
 } from '@/utils/validators'
 import AlertNotification from '../common/AlertNotification.vue'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter ()
+
 
 const formDataDefault = {
   firstname: '',
@@ -18,6 +23,7 @@ const formDataDefault = {
   password_confirmation: '',
 }
 
+//Register Functionaity
 const onSubmit = async () => {
   formAction.value = { ...formActionDefault }
   formAction.value.formProcess = true
@@ -29,6 +35,7 @@ const onSubmit = async () => {
       data: {
         firstname: formData.value.firstname,
         lastname: formData.value.lastname,
+        //is_admin: true
       },
     },
   })
@@ -39,14 +46,21 @@ const onSubmit = async () => {
     formAction.value.formStatus = error.status
   } else if (data) {
     console.log(data)
+    //Success message
     formAction.value.formSuccessMessage = 'Successfully Registered Account.'
     //Add here more actions if you want
-    refVForm.value?.reset()
+    router.replace('/home')
+
   }
 
+
+  //Reset Form
+  refVForm.value?.reset()
+  //Turn off Processing
   formAction.value.formProcess = false
 }
 
+// Trigger Validators
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) onSubmit()

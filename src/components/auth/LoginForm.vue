@@ -15,7 +15,7 @@ const formData = ref({
 })
 
 const onSubmit = () => {
-  // later for supabase just remove the double slash and this message // alert(formData.value.email)
+  alert(formData.value.email)
 }
 
 const onFormSubmit = () => {

@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { isAuthenticated } from '@/utils/supabase'
+import { onMounted } from 'vue'
 
 const router = useRouter()
 
@@ -12,6 +14,21 @@ function logout() {
 function viewProfile() {
   router.push('/profile')
 }
+
+
+//Load Variables
+const isLoggedIn = ref(false
+)
+
+//Get Authentication from Supabase
+const getLoggedStatus = async () => {
+  isLoggedIn.value = await isAuthenticated
+}
+
+// Load functions during component rendering
+onMounted(() =>
+getLoggedStatus()
+)
 </script>
 
 <template>
@@ -59,7 +76,7 @@ function viewProfile() {
     </v-main>
 
     <!-- Footer -->
-    <v-footer class="font-weight-bold" color="transparent" elevation="20" border app>
+    <v-footer class="font-weight-bold" color="white" elevation="20" border app>
       2025 - Reservo
     </v-footer>
   </v-app>
