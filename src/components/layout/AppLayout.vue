@@ -1,34 +1,48 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { isAuthenticated } from '@/utils/supabase'
+import { supabase } from '@/utils/supabase'
 import { onMounted } from 'vue'
 
 const router = useRouter()
 
+// Snackbar state
+const snackbar = ref(false)
+const snackbarMessage = ref('')
+
+// Snackbar timeout
+const snackbarTimeout = ref(3000) // 3 seconds
+
 function logout() {
-  localStorage.removeItem('token')
-  router.push('/')
+  // Call Supabase logout
+  supabase.auth.signOut().then(({ error }) => {
+    if (error) {
+      console.error('Logout error:', error.message)
+    } else {
+      localStorage.removeItem('rememberedEmail') // optional cleanup
+      snackbarMessage.value = 'Logged out successfully'
+      snackbar.value = true
+      setTimeout(() => {
+        router.push('/') // Redirect to login after 3 seconds
+      }, snackbarTimeout.value)
+    }
+  })
 }
 
 function viewProfile() {
   router.push('/profile')
 }
 
+// Load Variables
+const isLoggedIn = ref(false)
 
-//Load Variables
-const isLoggedIn = ref(false
-)
-
-//Get Authentication from Supabase
+// Get Authentication from Supabase
 const getLoggedStatus = async () => {
   isLoggedIn.value = await isAuthenticated
 }
 
 // Load functions during component rendering
-onMounted(() =>
-getLoggedStatus()
-)
+onMounted(() => getLoggedStatus())
 </script>
 
 <template>
@@ -49,21 +63,21 @@ getLoggedStatus()
       <!-- Menu List -->
       <v-list nav dense>
         <v-list-item @click="$router.push('/home')" link>
-          <v-list-item-title class="text-subtitle-1"
-            ><v-icon start>mdi-book</v-icon>Book Reservation</v-list-item-title
-          >
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-book</v-icon>Book Reservation
+          </v-list-item-title>
         </v-list-item>
 
         <v-list-item @click="viewProfile" link>
-          <v-list-item-title class="text-subtitle-1"
-            ><v-icon start>mdi-account</v-icon>View Profile</v-list-item-title
-          >
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-account</v-icon>View Profile
+          </v-list-item-title>
         </v-list-item>
 
         <v-list-item @click="logout" link>
-          <v-list-item-title class="text-subtitle-1"
-            ><v-icon start>mdi-logout</v-icon>Logout</v-list-item-title
-          >
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-logout</v-icon>Logout
+          </v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -79,5 +93,10 @@ getLoggedStatus()
     <v-footer class="font-weight-bold" color="white" elevation="20" border app>
       2025 - Reservo
     </v-footer>
+
+    <!-- Snackbar for success -->
+    <v-snackbar v-model="snackbar" timeout="snackbarTimeout" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-app>
 </template>

@@ -3,6 +3,7 @@ import LoginView from '@/views/auth/auth/LoginView.vue'
 import RegisterView from '@/views/auth/auth/RegisterView.vue'
 import ProfileView from '@/views/auth/auth/ProfileView.vue'
 import HomeView from '@/views/auth/auth/HomeView.vue'
+import NotFound from '@/views/auth/auth/NotFound.vue'
 import { supabase } from '@/utils/supabase.js'
 
 const router = createRouter({
@@ -22,6 +23,11 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/:pathMatch(.*)*', // 👈 Catch-all for unknown routes
+      name: 'NotFound',
+      component: NotFound,
+    }
   ],
 })
 
