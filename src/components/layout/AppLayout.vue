@@ -1,57 +1,102 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '@/utils/supabase'
+import { onMounted } from 'vue'
 
-// get the router instance
 const router = useRouter()
 
+// Snackbar state
+const snackbar = ref(false)
+const snackbarMessage = ref('')
+
+// Snackbar timeout
+const snackbarTimeout = ref(3000) // 3 seconds
+
 function logout() {
-  // Clear any auth/session data (optional)
-  localStorage.removeItem('token') // if you use tokens
+  // Call Supabase logout
+  supabase.auth.signOut().then(({ error }) => {
+    if (error) {
+      console.error('Logout error:', error.message)
+    } else {
+      localStorage.removeItem('rememberedEmail') // optional cleanup
+      snackbarMessage.value = 'Logged out successfully'
+      snackbar.value = true
+      setTimeout(() => {
+        router.push('/') // Redirect to login after 3 seconds
+      }, snackbarTimeout.value)
+    }
+  })
+}
 
-  // Redirect to login or home
-  router.push('/')}
+function viewProfile() {
+  router.push('/profile')
+}
 
-  function viewProfile () {
+// Load Variables
+const isLoggedIn = ref(false)
 
-    router.push('/profile')
-  }
+// Get Authentication from Supabase
+const getLoggedStatus = async () => {
+  isLoggedIn.value = await isAuthenticated
+}
+
+// Load functions during component rendering
+onMounted(() => getLoggedStatus())
 </script>
 
 <template>
   <v-app>
-    <v-app-bar app color="blue-lighten-2" dark>
-      <v-img src="images/logo.png" alt="Logo" max-width="90" class="mr-4" />
+    <!-- Side Drawer -->
+    <v-navigation-drawer
+      app
+      permanent
+      style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
+    >
+      <!-- Logo -->
+      <v-container class="text-center py-4">
+        <v-avatar size="150" class="mx-auto">
+          <v-img src="images/logo.png" alt="Logo" cover></v-img>
+        </v-avatar>
+      </v-container>
 
-      <v-spacer />
+      <!-- Menu List -->
+      <v-list nav dense>
+        <v-list-item @click="$router.push('/home')" link>
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-book</v-icon>Book Reservation
+          </v-list-item-title>
+        </v-list-item>
 
-      <v-btn to="/home" text>Home</v-btn>
-      <v-btn to="/reservation" text>Reserve</v-btn>
+        <v-list-item @click="viewProfile" link>
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-account</v-icon>View Profile
+          </v-list-item-title>
+        </v-list-item>
 
-      <!-- Profile Menu -->
-      <v-menu offset-y>
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-account</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="viewProfile">
-            <v-list-item-title>View Profile</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="logout">
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-app-bar>
+        <v-list-item @click="logout" link>
+          <v-list-item-title class="text-subtitle-1">
+            <v-icon start>mdi-logout</v-icon>Logout
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-    <!-- Page Content -->
+    <!-- Main Content -->
     <v-main>
-        <v-container>
-          <slot name="content"></slot>
-        </v-container>
-      </v-main>
+      <div class="fill-height pa-0 ma-0">
+        <slot name="content"></slot>
+      </div>
+    </v-main>
 
-      <v-footer class="font-weight-bold" color="transparent" elevation="20" border app> 2025 - Reservo</v-footer>
-    </v-app>
+    <!-- Footer -->
+    <v-footer class="font-weight-bold" color="white" elevation="20" border app>
+      2025 - Reservo
+    </v-footer>
+
+    <!-- Snackbar for success -->
+    <v-snackbar v-model="snackbar" timeout="snackbarTimeout" top>
+      {{ snackbarMessage }}
+    </v-snackbar>
+  </v-app>
 </template>
