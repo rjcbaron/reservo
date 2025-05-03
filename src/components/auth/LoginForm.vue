@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase, formActionDefault } from '@/utils/supabase.js'
 import { requiredValidator, emailValidator } from '@/utils/validators'
+import AlertNotification from '../common/AlertNotification.vue'
+
 
 const router = useRouter()
 const isPasswordvisible = ref(false)
@@ -47,6 +49,17 @@ const onFormSubmit = () => {
 </script>
 
 <template>
+
+  <AlertNotification
+    :formSuccessMessage="formAction.formSuccessMessage"
+    :formErrorMessage="formAction.formErrorMessage"
+  />
+
+  <v-form ref="refVForm" @submit.prevent="onFormSubmit">
+    <!-- form fields -->
+  </v-form>
+
+
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-text-field
       v-model="formData.email"

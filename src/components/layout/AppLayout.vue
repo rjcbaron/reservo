@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import { onMounted } from 'vue'
+import { isAuthenticated } from '@/utils/supabase'
 
 const router = useRouter()
 
