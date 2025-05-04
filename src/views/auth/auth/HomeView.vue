@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
+import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 
 const selectedDate = ref('2025-04-22')
 const selectedTime = ref('')
@@ -42,6 +42,21 @@ const profile = ref({
 })
 
 onMounted(async () => {
+  const currentDate = new Date()
+
+  // Set the selected date to today
+  selectedDate.value = currentDate.toISOString().split('T')[0] // Format as yyyy-mm-dd
+
+  // Set the selected time to current time rounded to the nearest 30-minute slot
+  const currentTime = currentDate.getHours() * 60 + currentDate.getMinutes()
+  const roundedTime = Math.round(currentTime / 30) * 30
+
+  const hour = Math.floor(roundedTime / 60)
+  const minute = roundedTime % 60
+
+  const time = `${hour % 12 === 0 ? 12 : hour % 12}:${minute === 0 ? '00' : minute} ${hour >= 12 ? 'PM' : 'AM'}`
+  selectedTime.value = time // Set the selected time
+
   const {
     data: { user },
     error,
@@ -104,7 +119,7 @@ const cancelBooking = () => {
 </script>
 
 <template>
-  <AppLayout>
+  <DefaultLayout>
     <template #content>
       <v-container fluid class="pa-4">
         <!-- Welcome Banner -->
@@ -262,7 +277,7 @@ const cancelBooking = () => {
         </v-container>
       </v-container>
     </template>
-  </AppLayout>
+  </DefaultLayout>
 </template>
 
 <style scoped></style>

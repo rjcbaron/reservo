@@ -1,13 +1,13 @@
 <script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
 import RegisterForm from '@/components/auth/RegisterForm.vue'
 import { useDisplay } from 'vuetify'
+import AuthLayout from '@/components/layout/AuthLayout.vue'
 
 const { mobile } = useDisplay()
 </script>
 
 <template>
-  <AppLayout>
+  <AuthLayout>
     <template #content>
       <!-- Background and Centering -->
       <div
@@ -38,5 +38,5 @@ const { mobile } = useDisplay()
         </v-row>
       </div>
     </template>
-  </AppLayout>
+  </AuthLayout>
 </template>
