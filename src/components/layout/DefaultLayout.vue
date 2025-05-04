@@ -18,7 +18,11 @@ const logout = async () => {
 <template>
   <v-app>
     <!-- App Bar -->
-    <v-app-bar app color="primary" dark flat>
+    <v-app-bar
+      app
+      style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
+      flat
+    >
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>Reservo</v-toolbar-title>
     </v-app-bar>
@@ -63,5 +67,3 @@ const logout = async () => {
     </v-footer>
   </v-app>
 </template>
-
-
