@@ -1,55 +1,43 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/utils/supabase'
 import { onMounted } from 'vue'
-import { isAuthenticated } from '@/utils/supabase'
 
 const router = useRouter()
+const route = useRoute()
 
-// Snackbar state
 const snackbar = ref(false)
 const snackbarMessage = ref('')
+const snackbarTimeout = ref(3000)
 
-// Snackbar timeout
-const snackbarTimeout = ref(3000) // 3 seconds
-
-function logout() {
-  // Call Supabase logout
-  supabase.auth.signOut().then(({ error }) => {
-    if (error) {
-      console.error('Logout error:', error.message)
-    } else {
-      localStorage.removeItem('rememberedEmail') // optional cleanup
-      snackbarMessage.value = 'Logged out successfully'
-      snackbar.value = true
-      setTimeout(() => {
-        router.push('/') // Redirect to login after 3 seconds
-      }, snackbarTimeout.value)
-    }
-  })
+const logout = async () => {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error('Logout error:', error.message)
+  } else {
+    localStorage.removeItem('rememberedEmail')
+    setTimeout(() => {
+      router.push('/')
+    }, snackbarTimeout.value)
+  }
 }
 
-function viewProfile() {
+const viewProfile = () => {
   router.push('/profile')
 }
 
-// Load Variables
-const isLoggedIn = ref(false)
-
-// Get Authentication from Supabase
-const getLoggedStatus = async () => {
-  isLoggedIn.value = await isAuthenticated
-}
-
-// Load functions during component rendering
-onMounted(() => getLoggedStatus())
+// Only show drawer and footer on non-login/register pages
+const showLayout = computed(() => {
+  return route.name !== 'login' && route.name !== 'register'
+})
 </script>
 
 <template>
   <v-app>
     <!-- Side Drawer -->
     <v-navigation-drawer
+      v-if="showLayout"
       app
       permanent
       style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
@@ -91,13 +79,8 @@ onMounted(() => getLoggedStatus())
     </v-main>
 
     <!-- Footer -->
-    <v-footer class="font-weight-bold" color="white" elevation="20" border app>
+    <v-footer v-if="showLayout" class="font-weight-bold" color="white" elevation="20" border app>
       2025 - Reservo
     </v-footer>
-
-    <!-- Snackbar for success -->
-    <v-snackbar v-model="snackbar" timeout="snackbarTimeout" top>
-      {{ snackbarMessage }}
-    </v-snackbar>
   </v-app>
 </template>
