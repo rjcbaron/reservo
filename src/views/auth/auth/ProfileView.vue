@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import AppLayout from '@/components/layout/AppLayout.vue'
+import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 import { supabase } from '@/utils/supabase'
 
 const currentTab = ref('profile')
@@ -71,7 +71,7 @@ const saveChanges = async () => {
 </script>
 
 <template>
-  <AppLayout>
+  <DefaultLayout>
     <template #content>
       <v-container class="d-flex justify-center align-center" style="min-height: 100vh">
         <v-row class="w-100" align="center" justify="center">
@@ -212,5 +212,5 @@ const saveChanges = async () => {
         </v-row>
       </v-container>
     </template>
-  </AppLayout>
+  </DefaultLayout>
 </template>

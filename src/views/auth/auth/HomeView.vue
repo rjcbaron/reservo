@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import AppLayout from '@/components/layout/AppLayout.vue'
 import { supabase } from '@/utils/supabase'
+import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 
 const selectedDate = ref('2025-04-22')
 const selectedTime = ref('')
@@ -119,7 +119,7 @@ const cancelBooking = () => {
 </script>
 
 <template>
-  <AppLayout>
+  <DefaultLayout>
     <template #content>
       <v-container fluid class="pa-4">
         <!-- Welcome Banner -->
@@ -277,7 +277,7 @@ const cancelBooking = () => {
         </v-container>
       </v-container>
     </template>
-  </AppLayout>
+  </DefaultLayout>
 </template>
 
 <style scoped></style>

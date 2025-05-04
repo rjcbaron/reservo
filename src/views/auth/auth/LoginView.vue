@@ -1,5 +1,5 @@
 <script setup>
-import AppLayout from '@/components/layout/AppLayout.vue'
+import AuthLayout from '@/components/layout/AuthLayout.vue'
 import LoginForm from '@/components/auth/LoginForm.vue'
 import { useDisplay } from 'vuetify'
 
@@ -7,7 +7,7 @@ const { mobile } = useDisplay()
 </script>
 
 <template>
-  <AppLayout>
+  <AuthLayout>
     <template #content>
       <div
         class="d-flex align-center justify-center"
@@ -56,5 +56,5 @@ const { mobile } = useDisplay()
         </v-row>
       </div>
     </template>
-  </AppLayout>
+  </AuthLayout>
 </template>
