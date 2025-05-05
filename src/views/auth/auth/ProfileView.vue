@@ -15,10 +15,8 @@ const profile = ref({
   phone: '',
 })
 
-// Sample reservations (can also be fetched from Supabase)
 const reservations = ref([])
 
-// Fetch profile data on mount
 onMounted(async () => {
   const {
     data: { user },
@@ -36,9 +34,21 @@ onMounted(async () => {
   profile.value.email = user.email || ''
   profile.value.confirmEmail = user.email || ''
   profile.value.phone = metadata.phone || ''
+
+  // Fetch reservations
+  const { data: reservationsData, error: reservationsError } = await supabase
+    .from('reservations')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('reserved_start', { ascending: true })
+
+  if (reservationsError) {
+    console.error('Error fetching reservations:', reservationsError)
+  } else {
+    reservations.value = reservationsData
+  }
 })
 
-// Optional: Save profile updates
 const saveChanges = async () => {
   const {
     data: { user },
@@ -167,7 +177,11 @@ const saveChanges = async () => {
                       :key="index"
                       class="rounded-lg border mb-2"
                     >
-                      <v-list-item-title>{{ res.date }} at {{ res.time }}</v-list-item-title>
+                      <v-list-item-title>
+                        {{ new Date(res.reserved_start).toLocaleDateString() }}
+                        at
+                        {{ new Date(res.reserved_start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                      </v-list-item-title>
                     </v-list-item>
                   </v-list>
                 </v-window-item>
@@ -178,17 +192,17 @@ const saveChanges = async () => {
                   <v-expansion-panels>
                     <v-expansion-panel>
                       <v-expansion-panel-title>How do I edit my profile?</v-expansion-panel-title>
-                      <v-expansion-panel-text
-                        >Just update the fields and click "Save Changes".</v-expansion-panel-text
-                      >
+                      <v-expansion-panel-text>
+                        Just update the fields and click "Save Changes".
+                      </v-expansion-panel-text>
                     </v-expansion-panel>
                     <v-expansion-panel>
-                      <v-expansion-panel-title
-                        >How do I cancel a reservation?</v-expansion-panel-title
-                      >
-                      <v-expansion-panel-text
-                        >Contact support to cancel a reservation.</v-expansion-panel-text
-                      >
+                      <v-expansion-panel-title>
+                        How do I cancel a reservation?
+                      </v-expansion-panel-title>
+                      <v-expansion-panel-text>
+                        Contact support to cancel a reservation.
+                      </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-window-item>

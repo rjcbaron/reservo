@@ -1,12 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/utils/supabase'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
 
-const selectedDate = ref('2025-04-22')
+const selectedDate = ref('')
 const selectedTime = ref('')
+const userReservations = ref([])
+const allReservations = ref([])
 const dialog = ref(false)
 const confirmed = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+const loadingReservations = ref(false)
+const tab = ref('upcoming')
 
 const morningSlots = [
   '8:00 AM',
@@ -36,85 +42,220 @@ const afternoonSlots = [
   '7:00 PM',
 ]
 
-const profile = ref({
-  firstName: '',
-  lastName: '',
+const profile = ref({ firstName: '', lastName: '', userId: null })
+
+const formatDate = (dateString) => {
+  const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }
+  return new Date(dateString).toLocaleDateString(undefined, options)
+}
+
+const formatTime = (dateString) => {
+  const date = new Date(dateString)
+  let hours = date.getHours()
+  const minutes = date.getMinutes()
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12 || 12
+  const minutesStr = minutes < 10 ? '0' + minutes : minutes
+  return `${hours}:${minutesStr} ${ampm}`
+}
+
+const upcomingReservations = computed(() => {
+  const now = new Date()
+  return userReservations.value
+    .filter((res) => new Date(res.reserved_start) >= now)
+    .sort((a, b) => new Date(a.reserved_start) - new Date(b.reserved_start))
 })
+
+const pastReservations = computed(() => {
+  const now = new Date()
+  return userReservations.value
+    .filter((res) => new Date(res.reserved_start) < now)
+    .sort((a, b) => new Date(b.reserved_start) - new Date(a.reserved_start))
+})
+
+const fetchUserReservations = async (userId) => {
+  if (!userId) return
+  loadingReservations.value = true
+  try {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('user_id', userId)
+      .order('reserved_start', { ascending: false })
+    if (error) console.error('Error fetching reservations:', error)
+    userReservations.value = data || []
+  } catch (err) {
+    console.error('Unexpected error fetching reservations:', err)
+  } finally {
+    loadingReservations.value = false
+  }
+}
+
+const fetchAllReservations = async () => {
+  loadingReservations.value = true
+  try {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .order('reserved_start', { ascending: true })
+    if (error) console.error('Error fetching all reservations:', error)
+    allReservations.value = data || []
+  } catch (err) {
+    console.error('Unexpected error fetching all reservations:', err)
+  } finally {
+    loadingReservations.value = false
+  }
+}
+
+const deleteReservation = async (reservationId) => {
+  if (!reservationId) return
+  loading.value = true
+  try {
+    const { error } = await supabase.from('reservations').delete().eq('id', reservationId)
+    if (error) {
+      errorMessage.value = 'Failed to delete reservation. Try again.'
+      console.error('Reservation delete error:', error)
+    } else {
+      await fetchUserReservations(profile.value.userId)
+      await fetchAllReservations()
+    }
+  } catch (err) {
+    errorMessage.value = 'Unexpected error occurred.'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
   const currentDate = new Date()
-
-  // Set the selected date to today
-  selectedDate.value = currentDate.toISOString().split('T')[0] // Format as yyyy-mm-dd
-
-  // Set the selected time to current time rounded to the nearest 30-minute slot
+  selectedDate.value = currentDate.toISOString().split('T')[0]
   const currentTime = currentDate.getHours() * 60 + currentDate.getMinutes()
   const roundedTime = Math.round(currentTime / 30) * 30
-
   const hour = Math.floor(roundedTime / 60)
   const minute = roundedTime % 60
-
   const time = `${hour % 12 === 0 ? 12 : hour % 12}:${minute === 0 ? '00' : minute} ${hour >= 12 ? 'PM' : 'AM'}`
-  selectedTime.value = time // Set the selected time
+  selectedTime.value = time
 
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser()
 
-  if (error || !user) {
-    console.error('User not logged in:', error)
+  if (!user || error) {
+    const storedUserId = localStorage.getItem('userId')
+    if (storedUserId) {
+      profile.value.userId = storedUserId
+      profile.value.firstName = 'User'
+      profile.value.lastName = ''
+      await fetchUserReservations(storedUserId)
+    }
+    await fetchAllReservations()
     return
   }
 
-  // Get name !
   profile.value.firstName = user.user_metadata?.firstname || 'User'
   profile.value.lastName = user.user_metadata?.lastname || ''
+  profile.value.userId = user.id
+  localStorage.setItem('userId', user.id)
+  await fetchUserReservations(user.id)
+  await fetchAllReservations()
 })
 
 const bookAppointment = () => {
+  errorMessage.value = ''
+  const today = new Date()
+  const selected = new Date(selectedDate.value)
+  if (selected < new Date(today.toDateString())) {
+    errorMessage.value = 'You cannot book an appointment in the past.'
+    return
+  }
   if (selectedTime.value) {
     dialog.value = true
   }
 }
 
 const confirmBooking = async () => {
-  confirmed.value = true
-  dialog.value = false
-
-  const reservedStart = new Date(`${selectedDate.value} ${selectedTime.value}`)
-  const reservedEnd = new Date(reservedStart.getTime() + 30 * 60000)
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    console.error('User not found:', userError)
+  errorMessage.value = ''
+  if (!selectedDate.value || !selectedTime.value) {
+    errorMessage.value = 'Please select date and time before confirming.'
     return
   }
 
-  const { error } = await supabase.from('reservations').insert([
-    {
-      user_id: user.id,
-      facility_id: 1,
-      status: 'confirmed',
-      reserved_start: reservedStart.toISOString(),
-      reserved_end: reservedEnd.toISOString(),
-    },
-  ])
+  loading.value = true
+  const timeParts = selectedTime.value.match(/(\d+):(\d+) (\w+)/)
+  if (!timeParts) {
+    errorMessage.value = 'Invalid time format selected.'
+    loading.value = false
+    return
+  }
 
-  if (error) {
-    console.error('Failed to insert reservation:', error)
-  } else {
-    console.log('Reservation created successfully')
+  let hour = parseInt(timeParts[1])
+  const minute = parseInt(timeParts[2])
+  const ampm = timeParts[3]
+  if (ampm === 'PM' && hour !== 12) hour += 12
+  else if (ampm === 'AM' && hour === 12) hour = 0
+
+  const reservedStart = new Date(selectedDate.value)
+  reservedStart.setHours(hour, minute, 0, 0)
+
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    if (userError || !user) {
+      errorMessage.value = 'User not authenticated.'
+      loading.value = false
+      return
+    }
+
+    const { data: existing, error: checkError } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('reserved_start', reservedStart.toISOString())
+
+    if (checkError) {
+      errorMessage.value = 'Error checking existing bookings.'
+      loading.value = false
+      return
+    }
+
+    if (existing.length > 0) {
+      errorMessage.value = 'This time slot is already booked. Please choose another.'
+      loading.value = false
+      return
+    }
+
+    const { error } = await supabase.from('reservations').insert([
+      {
+        user_id: user.id,
+        reserved_start: reservedStart.toISOString(),
+        created_at: new Date().toISOString(),
+      },
+    ])
+
+    if (error) {
+      errorMessage.value = 'Failed to create reservation. Try again.'
+      console.error('Reservation insert error:', error)
+    } else {
+      confirmed.value = true
+      dialog.value = false
+      await fetchUserReservations(user.id)
+      await fetchAllReservations()
+    }
+  } catch (err) {
+    errorMessage.value = 'Unexpected error occurred.'
+    console.error(err)
+  } finally {
+    loading.value = false
   }
 }
 
 const cancelBooking = () => {
   confirmed.value = false
   selectedTime.value = ''
+  errorMessage.value = ''
 }
 </script>
 
@@ -143,40 +284,144 @@ const cancelBooking = () => {
           </v-row>
         </v-card>
 
-        <!-- Scheduled Reservation Section -->
-        <v-row class="mt-5 mb-2" justify="center">
+        <!-- User Reservations Section -->
+        <v-row class="mt-5 mb-4" justify="center">
           <v-col cols="12" md="11">
-            <v-card
-              elevation="4"
-              rounded="xl"
-              class="pa-4 mx-auto"
-              color="blue-grey-lighten-5"
-              style="border: 2px dashed #90caf9"
-            >
-              <!-- reservation reminder with cancel and update features -->
-              <v-row align="center">
-                <v-col cols="12" md="1" class="text-center">
-                  <v-icon color="blue" size="36">mdi-calendar-check</v-icon>
-                </v-col>
-                <v-col cols="12" md="11">
-                  <div v-if="confirmed">
-                    <p class="text-body-1 font-weight-medium">
-                      📢 You have confirmed a reservation on
-                      <strong>{{ selectedDate }}</strong> at <strong>{{ selectedTime }}</strong
-                      >.
-                    </p>
-                    <v-btn color="red" variant="text" @click="cancelBooking">Cancel</v-btn>
-                    <v-btn color="blue-lighten-1" variant="text" @click="confirmed = false"
-                      >Update</v-btn
-                    >
-                  </div>
-                  <div v-else>
-                    <p class="text-body-2 text-grey-darken-1">
-                      No reservation scheduled yet. Select a time to reserve your slot.
-                    </p>
-                  </div>
-                </v-col>
-              </v-row>
+            <v-card elevation="4" rounded="xl" class="pa-4 mx-auto">
+              <v-card-title class="text-h6 font-weight-bold pb-2 pt-1">
+                <v-icon color="blue" size="28" class="me-2">mdi-calendar-multiple</v-icon>
+                Your Reservations
+              </v-card-title>
+
+              <v-card-text>
+                <v-tabs v-model="tab" color="blue-lighten-1">
+                  <v-tab value="upcoming">Upcoming</v-tab>
+                  <v-tab value="past">Past</v-tab>
+                  <v-tab value="all">All Reservations</v-tab>
+                </v-tabs>
+
+                <v-window v-model="tab">
+                  <!-- Upcoming Reservations Tab -->
+                  <v-window-item value="upcoming">
+                    <v-sheet class="pt-4">
+                      <div v-if="loadingReservations" class="d-flex justify-center pa-4">
+                        <v-progress-circular indeterminate color="blue"></v-progress-circular>
+                      </div>
+                      <div
+                        v-else-if="upcomingReservations.length === 0"
+                        class="text-center pa-4 text-grey"
+                      >
+                        No upcoming reservations. Book a time slot below!
+                      </div>
+                      <v-list v-else lines="two">
+                        <v-list-item
+                          v-for="reservation in upcomingReservations"
+                          :key="reservation.id"
+                          class="mb-2"
+                          rounded="lg"
+                        >
+                          <template v-slot:prepend>
+                            <v-avatar color="blue-lighten-4" class="me-4">
+                              <v-icon color="blue-darken-1">mdi-clock</v-icon>
+                            </v-avatar>
+                          </template>
+
+                          <v-list-item-title class="font-weight-medium">
+                            {{ formatDate(reservation.reserved_start) }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle>
+                            Time: {{ formatTime(reservation.reserved_start) }}
+                          </v-list-item-subtitle>
+
+                          <template v-slot:append>
+                            <v-btn
+                              color="red"
+                              variant="text"
+                              density="comfortable"
+                              :loading="loading"
+                              @click="deleteReservation(reservation.id)"
+                            >
+                              Cancel
+                            </v-btn>
+                          </template>
+                        </v-list-item>
+                      </v-list>
+                    </v-sheet>
+                  </v-window-item>
+
+                  <!-- Past Reservations Tab -->
+                  <v-window-item value="past">
+                    <v-sheet class="pt-4">
+                      <div v-if="loadingReservations" class="d-flex justify-center pa-4">
+                        <v-progress-circular indeterminate color="blue"></v-progress-circular>
+                      </div>
+                      <div
+                        v-else-if="pastReservations.length === 0"
+                        class="text-center pa-4 text-grey"
+                      >
+                        No past reservations found.
+                      </div>
+                      <v-list v-else lines="two">
+                        <v-list-item
+                          v-for="reservation in pastReservations"
+                          :key="reservation.id"
+                          class="mb-2"
+                          rounded="lg"
+                        >
+                          <template v-slot:prepend>
+                            <v-avatar color="grey-lighten-3" class="me-4">
+                              <v-icon color="grey-darken-1">mdi-clock-outline</v-icon>
+                            </v-avatar>
+                          </template>
+
+                          <v-list-item-title class="text-grey-darken-1">
+                            {{ formatDate(reservation.reserved_start) }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle class="text-grey">
+                            Time: {{ formatTime(reservation.reserved_start) }}
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                      </v-list>
+                    </v-sheet>
+                  </v-window-item>
+
+                  <!-- All Reservations Tab -->
+                  <v-window-item value="all">
+                    <v-sheet class="pt-4">
+                      <div v-if="loadingReservations" class="d-flex justify-center pa-4">
+                        <v-progress-circular indeterminate color="blue"></v-progress-circular>
+                      </div>
+                      <div
+                        v-else-if="allReservations.length === 0"
+                        class="text-center pa-4 text-grey"
+                      >
+                        No reservations found.
+                      </div>
+                      <v-list v-else lines="two">
+                        <v-list-item
+                          v-for="reservation in allReservations"
+                          :key="reservation.id"
+                          class="mb-2"
+                          rounded="lg"
+                        >
+                          <template v-slot:prepend>
+                            <v-avatar color="grey-lighten-3" class="me-4">
+                              <v-icon color="grey-darken-1">mdi-clock-outline</v-icon>
+                            </v-avatar>
+                          </template>
+
+                          <v-list-item-title class="text-grey-darken-1">
+                            {{ formatDate(reservation.reserved_start) }}
+                          </v-list-item-title>
+                          <v-list-item-subtitle class="text-grey">
+                            Time: {{ formatTime(reservation.reserved_start) }}
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                      </v-list>
+                    </v-sheet>
+                  </v-window-item>
+                </v-window>
+              </v-card-text>
             </v-card>
           </v-col>
         </v-row>
@@ -186,6 +431,10 @@ const cancelBooking = () => {
           <v-row class="w-100" align="center" justify="center">
             <v-col cols="12" md="4">
               <v-card elevation="2" class="rounded-xl pa-4">
+                <v-card-title class="text-h6 font-weight-bold pb-2">
+                  <v-icon color="blue" size="24" class="me-2">mdi-calendar-plus</v-icon>
+                  Book a Slot
+                </v-card-title>
                 <v-date-picker
                   v-model="selectedDate"
                   color="blue-lighten-1"
@@ -242,12 +491,15 @@ const cancelBooking = () => {
 
                 <v-divider class="my-6" />
 
+                <!-- Error Message -->
+                <p v-if="errorMessage" class="text-center red--text mb-4">{{ errorMessage }}</p>
+
                 <!-- Book Now Button -->
                 <div class="text-center">
                   <v-btn
                     color="blue-lighten-1"
                     size="large"
-                    :disabled="!selectedTime"
+                    :disabled="!selectedTime || loading"
                     @click="bookAppointment"
                   >
                     Book Now
@@ -269,8 +521,15 @@ const cancelBooking = () => {
                 </p>
               </v-card-text>
               <v-card-actions class="justify-end">
-                <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                <v-btn color="primary" @click="confirmBooking">Confirm</v-btn>
+                <v-btn variant="text" @click="dialog = false" :disabled="loading">Cancel</v-btn>
+                <v-btn
+                  color="primary"
+                  @click="confirmBooking"
+                  :loading="loading"
+                  :disabled="loading"
+                >
+                  Confirm
+                </v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -280,4 +539,8 @@ const cancelBooking = () => {
   </DefaultLayout>
 </template>
 
-<style scoped></style>
+<style scoped>
+.v-list-item {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+</style>

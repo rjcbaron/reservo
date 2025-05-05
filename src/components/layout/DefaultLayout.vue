@@ -15,12 +15,27 @@ const logout = async () => {
 }
 </script>
 
+// napugos kog comment ani kay nakulang akong commit message
+
 <template>
   <v-app>
     <!-- App Bar -->
-    <v-app-bar app color="primary" dark flat>
+    <v-app-bar
+      app
+      style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
+      flat
+    >
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-toolbar-title>Reservo</v-toolbar-title>
+
+      <!-- Home Icon -->
+      <v-btn icon to="/home" class="icon-hover">
+        <v-icon size="28">mdi-home</v-icon>
+      </v-btn>
+
+      <!-- Profile Icon -->
+      <v-btn icon to="/profile" class="icon-hover ml-2">
+        <v-icon size="28">mdi-account-circle</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <!-- Drawer -->
@@ -32,9 +47,11 @@ const logout = async () => {
       style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
     >
       <v-container class="text-center py-4">
-        <v-avatar size="100" class="mx-auto">
-          <v-img src="/images/logo.png" alt="Logo" cover />
-        </v-avatar>
+        <router-link to="/home">
+          <v-avatar size="100" class="mx-auto cursor-pointer logo-hover">
+            <v-img src="/images/logo.png" alt="Logo" cover />
+          </v-avatar>
+        </router-link>
       </v-container>
 
       <v-list nav dense>
@@ -64,4 +81,16 @@ const logout = async () => {
   </v-app>
 </template>
 
+<style scoped>
+.icon-hover:hover {
+  color: #0d47a1;
+  transition: color 0.3s ease;
+}
 
+.logo-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+</style>
