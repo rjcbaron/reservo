@@ -34,9 +34,15 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (to.meta.requiresAuth && !user) {
-    next('/') // not logged in → go to login
-  } else {
+  // Redirect to home if logged in and trying to access login or register
+  if ((to.name === 'login' || to.name === 'register') && user) {
+    next('/home')
+  }
+  // Redirect to login if trying to access protected page
+  else if (to.meta.requiresAuth && !user) {
+    next('/')
+  }
+  else {
     next()
   }
 })
