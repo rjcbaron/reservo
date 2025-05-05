@@ -24,7 +24,9 @@ const logout = async () => {
       flat
     >
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <v-toolbar-title>Reservo</v-toolbar-title>
+      <router-link to="/home" style="text-decoration: none; color: inherit;">
+        <v-toolbar-title class="cursor-pointer router-link-hover">Reservo</v-toolbar-title>
+      </router-link>
     </v-app-bar>
 
     <!-- Drawer -->
@@ -36,9 +38,11 @@ const logout = async () => {
       style="background: linear-gradient(to bottom, rgb(66, 165, 245), rgb(178, 202, 244))"
     >
       <v-container class="text-center py-4">
-        <v-avatar size="100" class="mx-auto">
-          <v-img src="/images/logo.png" alt="Logo" cover />
-        </v-avatar>
+        <router-link to="/home">
+          <v-avatar size="100" class="mx-auto cursor-pointer logo-hover">
+            <v-img src="/images/logo.png" alt="Logo" cover />
+          </v-avatar>
+        </router-link>
       </v-container>
 
       <v-list nav dense>
@@ -67,3 +71,21 @@ const logout = async () => {
     </v-footer>
   </v-app>
 </template>
+
+<style scoped>
+.router-link-hover:hover {
+  color: #0d47a1;
+  transition: color 0.3s ease;
+}
+
+.logo-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.router-link-hover,
+.logo-hover {
+  transition: all 0.3s ease;
+}
+</style>
