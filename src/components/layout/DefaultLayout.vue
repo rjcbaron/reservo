@@ -24,9 +24,16 @@ const logout = async () => {
       flat
     >
       <v-app-bar-nav-icon @click="drawer = !drawer" />
-      <router-link to="/home" style="text-decoration: none; color: inherit;">
-        <v-toolbar-title class="cursor-pointer router-link-hover">Reservo</v-toolbar-title>
-      </router-link>
+
+      <!-- Home Icon -->
+      <v-btn icon to="/home" class="icon-hover">
+        <v-icon size="28">mdi-home</v-icon>
+      </v-btn>
+
+      <!-- Profile Icon -->
+      <v-btn icon to="/profile" class="icon-hover ml-2">
+        <v-icon size="28">mdi-account-circle</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <!-- Drawer -->
@@ -73,7 +80,7 @@ const logout = async () => {
 </template>
 
 <style scoped>
-.router-link-hover:hover {
+.icon-hover:hover {
   color: #0d47a1;
   transition: color 0.3s ease;
 }
@@ -82,10 +89,5 @@ const logout = async () => {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.router-link-hover,
-.logo-hover {
-  transition: all 0.3s ease;
 }
 </style>
