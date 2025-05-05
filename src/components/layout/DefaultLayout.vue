@@ -15,6 +15,8 @@ const logout = async () => {
 }
 </script>
 
+// napugos kog comment ani kay nakulang akong commit message
+
 <template>
   <v-app>
     <!-- App Bar -->
@@ -90,4 +92,5 @@ const logout = async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 </style>
